@@ -1,0 +1,305 @@
+---
+title: Webhooks
+description: Set up webhooks to automate workflows and receive real-time notifications
+---
+
+## Webhooks Overview
+
+Webhooks in Qwin Q Documentation allow you to receive real-time notifications about events in your documentation space. Automate workflows by integrating with external services and tools.
+
+<Callout kind="info">Webhooks deliver JSON payloads to configured endpoints when specific events occur.</Callout>
+
+## Setting Up Webhooks
+
+Create and configure webhooks through the admin dashboard.
+
+<Steps>
+  <Step title="Access Webhook Settings" icon="settings">
+    Navigate to Settings > Integrations > Webhooks.
+    
+    You'll see a list of existing webhooks and options to create new ones.
+  </Step>
+  <Step title="Create New Webhook" icon="plus">
+    Click "Add Webhook" and configure the endpoint.
+    
+    <ParamField body="url" param-type="string" required="true">
+      The endpoint URL where webhook payloads will be sent.
+    </ParamField>
+    
+    <ParamField body="secret" param-type="string" required="false">
+      Optional secret for payload verification.
+    </ParamField>
+  </Step>
+  <Step title="Select Events" icon="bell">
+    Choose which events should trigger the webhook.
+    
+    <Expandable title="Available Events" default-open="false">
+      - Document created
+      - Document updated
+      - Document deleted
+      - User added
+      - Project published
+      - Comment added
+    </Expandable>
+  </Step>
+  <Step title="Test and Activate" icon="play">
+    Send a test payload and enable the webhook.
+    
+    Verify the endpoint receives and processes the payload correctly.
+  </Step>
+</Steps>
+
+## Event Types
+
+Qwin Q Documentation triggers webhooks for various events across your documentation space.
+
+<Tabs>
+  <Tab title="Content Events" icon="file-text">
+    Events related to documentation content.
+    
+    <ExpandableGroup>
+      <Expandable title="document.created" default-open="false">
+        Triggered when a new document is created.
+        
+        Payload includes document metadata and content.
+      </Expandable>
+      <Expandable title="document.updated" default-open="false">
+        Triggered when document content is modified.
+        
+        Payload includes changed fields and previous version.
+      </Expandable>
+      <Expandable title="document.deleted" default-open="false">
+        Triggered when a document is removed.
+        
+        Payload includes document ID and deletion timestamp.
+      </Expandable>
+    </ExpandableGroup>
+  </Tab>
+  <Tab title="User Events" icon="users">
+    Events related to user management.
+    
+    <ExpandableGroup>
+      <Expandable title="user.invited" default-open="false">
+        Triggered when a user is invited to the space.
+      </Expandable>
+      <Expandable title="user.joined" default-open="false">
+        Triggered when a user accepts an invitation.
+      </Expandable>
+      <Expandable title="user.removed" default-open="false">
+        Triggered when a user is removed from the space.
+      </Expandable>
+    </ExpandableGroup>
+  </Tab>
+  <Tab title="Publishing Events" icon="rocket">
+    Events related to content publishing.
+    
+    <ExpandableGroup>
+      <Expandable title="project.published" default-open="false">
+        Triggered when a project is published.
+      </Expandable>
+      <Expandable title="version.released" default-open="false">
+        Triggered when a new version is released.
+      </Expandable>
+    </ExpandableGroup>
+  </Tab>
+</Tabs>
+
+## Payload Structure
+
+All webhook payloads follow a consistent JSON structure.
+
+<Expandable title="Sample Payload" default-open="false">
+```json
+{
+  "event": "document.updated",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "webhook_id": "wh_123456",
+  "data": {
+    "document_id": "doc_789",
+    "project_id": "proj_456",
+    "user_id": "user_123",
+    "changes": {
+      "title": {
+        "old": "Old Title",
+        "new": "New Title"
+      }
+    }
+  }
+}
+```
+</Expandable>
+
+## Security and Verification
+
+Secure your webhooks with signature verification.
+
+<Callout kind="alert">Always verify webhook signatures to prevent unauthorized requests.</Callout>
+
+<Steps>
+  <Step title="Generate Secret" icon="key">
+    Create a secret key when setting up the webhook.
+    
+    Store this secret securely - it won't be shown again.
+  </Step>
+  <Step title="Verify Signature" icon="shield">
+    Check the X-QwinQ-Signature header in requests.
+    
+    <CodeGroup tabs="Node.js,Python">
+      ```javascript
+const crypto = require('crypto');
+
+function verifySignature(payload, signature, secret) {
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+  return crypto.timingSafeEqual(
+    Buffer.from(signature, 'hex'),
+    Buffer.from(expectedSignature, 'hex')
+  );
+}
+```
+      ```python
+import hmac
+import hashlib
+
+def verify_signature(payload, signature, secret):
+    expected = hmac.new(
+        secret.encode(),
+        payload.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(signature, expected)
+```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+## Retry Logic
+
+Qwin Q Documentation automatically retries failed webhook deliveries.
+
+<Expandable title="Retry Policy" default-open="false">
+  - Initial attempt immediately
+  - Retry after 1 minute
+  - Retry after 5 minutes
+  - Retry after 30 minutes
+  - Final retry after 2 hours
+  - Total of 5 attempts
+</Expandable>
+
+## Common Use Cases
+
+Popular ways to use webhooks with Qwin Q Documentation.
+
+<Columns cols={2}>
+  <Card title="Slack Notifications" icon="message-square" href="#slack-integration">
+    Send notifications to Slack channels when content changes.
+  </Card>
+  <Card title="CI/CD Integration" icon="git-branch" href="#ci-integration">
+    Trigger builds when documentation is updated.
+  </Card>
+</Columns>
+
+### Slack Integration
+
+<CodeGroup tabs="Webhook Script,Slack App">
+  ```javascript
+// Express.js webhook handler for Slack
+app.post('/webhook/qwinq', (req, res) => {
+  const payload = req.body;
+  
+  // Send to Slack
+  fetch(process.env.SLACK_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      text: `Document ${payload.event}: ${payload.data.title}`,
+      attachments: [{
+        fields: [
+          { title: 'Project', value: payload.data.project_name },
+          { title: 'User', value: payload.data.user_name }
+        ]
+      }]
+    })
+  });
+  
+  res.sendStatus(200);
+});
+```
+  ```bash
+# Using Slack's incoming webhooks
+curl -X POST https://hooks.slack.com/services/... \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Documentation updated!"}'
+```
+</CodeGroup>
+
+### CI/CD Integration
+
+<Expandable title="GitHub Actions Example" default-open="false">
+```yaml
+name: Deploy Docs
+on:
+  repository_dispatch:
+    types: [qwinq-updated]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy
+        run: |
+          # Your deployment commands
+          echo "Deploying updated docs"
+```
+</Expandable>
+
+## Monitoring and Logs
+
+Track webhook delivery and troubleshoot issues.
+
+<Expandable title="Webhook Logs" default-open="false">
+  - Delivery status for each attempt
+  - Response codes and error messages
+  - Payload size and processing time
+  - Retry history and timestamps
+</Expandable>
+
+<Callout kind="tip">Monitor webhook logs regularly to ensure reliable delivery.</Callout>
+
+## Troubleshooting
+
+Common webhook issues and solutions.
+
+<ExpandableGroup>
+  <Expandable title="Webhook Not Firing" default-open="false">
+    - Check event selection in webhook configuration
+    - Verify the webhook is active
+    - Review server logs for errors
+  </Expandable>
+  <Expandable title="Invalid Signature" default-open="false">
+    - Ensure secret matches between Qwin Q and your endpoint
+    - Check payload encoding (should be UTF-8)
+    - Verify HMAC algorithm (SHA-256)
+  </Expandable>
+  <Expandable title="Timeout Errors" default-open="false">
+    - Ensure endpoint responds within 10 seconds
+    - Check for network issues
+    - Implement asynchronous processing for long-running tasks
+  </Expandable>
+</ExpandableGroup>
+
+## Best Practices
+
+<Callout kind="success">Follow these guidelines for reliable webhook implementations.</Callout>
+
+- Use HTTPS endpoints for security
+- Implement idempotency to handle duplicate deliveries
+- Process webhooks asynchronously
+- Validate payloads before processing
+- Monitor delivery success rates
+- Have fallback mechanisms for critical notifications
+
+Webhooks provide powerful automation capabilities, allowing you to integrate Qwin Q Documentation seamlessly into your existing workflows and notification systems.

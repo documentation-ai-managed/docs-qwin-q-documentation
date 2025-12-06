@@ -1,0 +1,169 @@
+---
+title: Authentication
+description: Learn how to authenticate and authorize access to Qwin Q Documentation
+---
+
+## Authentication Overview
+
+Qwin Q Documentation supports multiple authentication methods to ensure secure access to your documentation spaces. You can use API keys, OAuth providers, or integrate with your existing identity management system.
+
+<Callout kind="info">All authentication methods support role-based access control for fine-grained permissions.</Callout>
+
+## API Key Authentication
+
+API keys provide a simple way to authenticate API requests to Qwin Q Documentation. You can generate keys for different environments and revoke them as needed.
+
+<Steps>
+  <Step title="Generate API Key" icon="key">
+    Access your account settings and navigate to the API keys section.
+    
+    Click "Generate New Key" and provide a descriptive name for the key.
+  </Step>
+  <Step title="Configure Permissions" icon="settings">
+    Select the appropriate permissions for the key.
+    
+    <Expandable title="Available Permissions" default-open="false">
+      - Read: View documentation
+      - Write: Create and edit content
+      - Admin: Manage users and settings
+      - Publish: Deploy documentation
+    </Expandable>
+  </Step>
+  <Step title="Use in Requests" icon="code">
+    Include the API key in your request headers.
+    
+    <CodeGroup tabs="cURL,Python">
+      ```bash
+      curl -H "Authorization: Bearer YOUR_API_KEY" \
+           https://api.qwinq.com/v1/docs
+      ```
+      ```python
+import requests
+
+headers = {
+    'Authorization': f'Bearer YOUR_API_KEY'
+}
+response = requests.get('https://api.qwinq.com/v1/docs', headers=headers)
+```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+## OAuth Integration
+
+Qwin Q Documentation integrates with popular OAuth providers including Google, GitHub, and Microsoft Azure AD. This allows users to authenticate using their existing accounts.
+
+<Tabs>
+  <Tab title="Google" icon="globe">
+    Configure Google OAuth in your admin settings.
+    
+    <ParamField path="client_id" param-type="string" required="true">
+      Your Google OAuth client ID.
+    </ParamField>
+    
+    <ParamField path="client_secret" param-type="string" required="true">
+      Your Google OAuth client secret.
+    </ParamField>
+  </Tab>
+  <Tab title="GitHub" icon="github">
+    Set up GitHub OAuth for developer-focused teams.
+    
+    <ParamField path="client_id" param-type="string" required="true">
+      Your GitHub OAuth app client ID.
+    </ParamField>
+    
+    <ParamField path="client_secret" param-type="string" required="true">
+      Your GitHub OAuth app client secret.
+    </ParamField>
+  </Tab>
+</Tabs>
+
+## Single Sign-On (SSO)
+
+For enterprise customers, Qwin Q Documentation supports SAML-based SSO integration. This allows seamless authentication through your organization's identity provider.
+
+<Expandable title="SSO Configuration Steps" default-open="false">
+  1. Contact support to enable SSO for your account
+  2. Provide your SAML metadata or configuration details
+  3. Test the integration in a staging environment
+  4. Deploy to production with user training
+</Expandable>
+
+## User Roles and Permissions
+
+Qwin Q Documentation uses a hierarchical permission system with four main roles: Viewer, Editor, Admin, and Owner.
+
+| Role | Permissions |
+|------|------------|
+| Viewer | Read access to documentation |
+| Editor | Create and edit content |
+| Admin | Manage users and settings |
+| Owner | Full control including billing |
+
+<Callout kind="tip">Assign roles at both the organization and project levels for granular control.</Callout>
+
+## Multi-Factor Authentication
+
+Enhance security by enabling multi-factor authentication (MFA) for all users. Qwin Q supports authenticator apps, SMS, and hardware security keys.
+
+<ExpandableGroup>
+  <Expandable title="MFA Setup" default-open="false">
+    1. Go to account security settings
+    2. Choose your preferred MFA method
+    3. Scan QR code or enter verification code
+    4. Verify setup with a test authentication
+  </Expandable>
+  <Expandable title="Supported MFA Methods" default-open="false">
+    - Authenticator apps (Google Authenticator, Authy)
+    - SMS verification
+    - Hardware security keys (YubiKey, etc.)
+    - Push notifications
+  </Expandable>
+</ExpandableGroup>
+
+## Token Management
+
+Manage authentication tokens and API keys through the admin dashboard. You can view token usage, set expiration dates, and revoke compromised credentials.
+
+<Expandable title="Token Best Practices" default-open="false">
+  - Rotate API keys regularly
+  - Use separate keys for different environments
+  - Monitor token usage for anomalies
+  - Revoke keys immediately if compromised
+</Expandable>
+
+## Troubleshooting Authentication Issues
+
+Common authentication problems and their solutions.
+
+<ExpandableGroup>
+  <Expandable title="API Key Not Working" default-open="false">
+    - Verify the key is not expired
+    - Check permissions are correctly set
+    - Ensure proper header format: `Authorization: Bearer YOUR_KEY`
+  </Expandable>
+  <Expandable title="OAuth Login Failing" default-open="false">
+    - Confirm OAuth app configuration
+    - Check callback URLs match
+    - Verify user has access to the OAuth provider
+  </Expandable>
+  <Expandable title="SSO Not Redirecting" default-open="false">
+    - Review SAML configuration
+    - Check certificate validity
+    - Verify metadata exchange
+  </Expandable>
+</ExpandableGroup>
+
+## Security Best Practices
+
+Follow these guidelines to maintain secure authentication in your Qwin Q Documentation instance.
+
+<Callout kind="alert">Regularly review and update your authentication settings to maintain security.</Callout>
+
+- Enable MFA for all admin accounts
+- Use strong, unique passwords
+- Implement least-privilege access
+- Monitor authentication logs
+- Keep OAuth and SSO configurations current
+
+Implementing robust authentication ensures your documentation remains secure while providing convenient access to authorized users. Qwin Q Documentation's flexible authentication system supports everything from simple API key access to complex enterprise SSO setups.

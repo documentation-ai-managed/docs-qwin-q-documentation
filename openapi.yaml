@@ -1,0 +1,221 @@
+openapi: '3.0.0'
+info:
+  version: 1.0.0
+  title: Qwin Q API
+  license:
+    name: MIT
+servers:
+  - url: https://api.qwinq.com/v1
+paths:
+  /docs:
+    get:
+      summary: List all documentation projects
+      operationId: listProjects
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: A paged array of documentation projects
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Projects'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new documentation project
+      operationId: createProject
+      responses:
+        201:
+          description: Project creation successful
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /docs/{projectId}:
+    get:
+      summary: Retrieve details for a specific documentation project
+      operationId: getProject
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: The unique identifier of the documentation project
+          schema:
+            type: string
+      responses:
+        200:
+          description: Detailed information about the requested project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Projects'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /users:
+    get:
+      summary: List all users in the documentation system
+      operationId: listUsers
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: A paged array of user accounts
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Register a new user account
+      operationId: createUser
+      responses:
+        201:
+          description: User account created successfully
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /webhooks:
+    get:
+      summary: List all configured webhooks
+      operationId: listWebhooks
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: A paged array of webhook configurations
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhooks'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new webhook configuration
+      operationId: createWebhook
+      responses:
+        201:
+          description: Webhook configuration created successfully
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Project:
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+    Projects:
+      type: array
+      items:
+        $ref: '#/components/schemas/Project'
+    User:
+      required:
+        - id
+        - email
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+        name:
+          type: string
+    Users:
+      type: array
+      items:
+        $ref: '#/components/schemas/User'
+    Webhook:
+      required:
+        - id
+        - url
+      properties:
+        id:
+          type: integer
+          format: int64
+        url:
+          type: string
+        events:
+          type: array
+          items:
+            type: string
+    Webhooks:
+      type: array
+      items:
+        $ref: '#/components/schemas/Webhook'
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
